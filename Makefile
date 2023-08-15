@@ -1,5 +1,5 @@
 # Build all
-VERSION ?= $(shell git rev-parse --abbrev-ref HEAD)
+# VERSION ?= $(shell git rev-parse --abbrev-ref HEAD)
 BUILDTIME := $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
 COMMIT := $(shell git rev-parse --short HEAD)
 
@@ -36,6 +36,8 @@ package:
 test:
 	go test -v $(go list ./... | grep -v /dashboard/)
 
+test-bin :
+
 ## version: Show version.
 version:
 	@echo version: $(VERSION)
@@ -52,5 +54,20 @@ help: Makefile
 	@echo "Available targets:"
 	@sed -n 's/^##//p' $< | column -t -s ':' |  sed -e 's/^/ /'
 
-test-me:
-	@echo HOME $(HOME)
+USER=dsatya6
+DOCKER_IMAGE_NAME=komisercnt
+ARCH=amd64
+build-container :
+	@echo ARCH $(ARCH)
+	@docker build --platform linux/$(ARCH) -t $(USER)/$(DOCKER_IMAGE_NAME):$(ARCH) .
+
+push-container :
+	@docker push $(USER)/$(DOCKER_IMAGE_NAME):$(ARCH)
+
+test-container :
+	@docker rm -f $(DOCKER_IMAGE_NAME) || true
+	@docker run --platform linux/$(ARCH) \
+           -v $(HOME)/credfiles/config_docker.toml:/etc/config/config.toml  \
+           -v $(HOME)/credfiles/credentials.yaml:/etc/config/credentials.yaml \
+           -d -p 3000:3000 --name=$(DOCKER_IMAGE_NAME) $(USER)/$(DOCKER_IMAGE_NAME):$(ARCH) \
+           komiser start --config /etc/config/config.toml
