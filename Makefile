@@ -51,3 +51,6 @@ help: Makefile
 	@echo $(EXECUTABLE) $(VERSION)
 	@echo "Available targets:"
 	@sed -n 's/^##//p' $< | column -t -s ':' |  sed -e 's/^/ /'
+
+test-me:
+	@echo HOME $(HOME)
