@@ -1,35 +1,18 @@
-FROM --platform=$TARGETPLATFORM golang:1.20-alpine as builder
+FROM --platform=$BUILDPLATFORM alpine:3.16
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 ARG SEGMENT_WRITE_KEY
 ARG VERSION
 LABEL MAINTAINER="mlabouardy <mohamed@tailwarden.com>"
 
-# BUILDPLATFORM macOS M1 : arm64 / TARGETPLATFORM Linux amd64
 RUN echo "Running on $BUILDPLATFORM, building for $TARGETPLATFORM" > /log
 
 ENV SEGMENT_WRITE_KEY $SEGMENT_WRITE_KEY
 ENV VERSION $VERSION
 
-# COPY bin/komiser /usr/bin/komiser
-WORKDIR /app
-COPY . /app
+COPY komiser /usr/bin/komiser
+RUN chmod +x /usr/bin/komiser && \
+    mkdir /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
 
-ARG EXECUTABLE=komiser
-
-ARG GO_FLAGS="-ldflags"
-
-RUN go mod tidy
-RUN go build -o bin/${EXECUTABLE} .
-
-# Use a minimal Alpine image as the base for the final image
-FROM  --platform=$TARGETPLATFORM  alpine:3.16
-
-# Set the working directory inside the container
-WORKDIR /app
-
-# Copy the built executable from the build container
-COPY --from=builder /app/bin/${EXECUTABLE} /usr/bin/${EXECUTABLE}
-RUN chmod +x  /usr/bin/${EXECUTABLE}
 EXPOSE $PORT
 ENTRYPOINT ["komiser", "start"]

@@ -40,7 +40,7 @@ function Navbar() {
           </Link>
         ))}
       </div>
-      <div className="flex gap-4 text-sm font-medium text-black-900 lg:gap-10">
+      {/* <div className="flex gap-4 text-sm font-medium text-black-900 lg:gap-10">
         <a
           className="hidden items-center gap-2 transition-colors hover:text-primary md:flex"
           href="https://docs.komiser.io/docs/intro?utm_source=komiser&utm_medium=referral&utm_campaign=static"
@@ -155,7 +155,7 @@ function Navbar() {
           </svg>
           Join our Discord
         </a>
-      </div>
+      </div> */}
     </nav>
   );
 }

@@ -56,15 +56,44 @@ help: Makefile
 
 USER=dsatya6
 DOCKER_IMAGE_NAME=komisercnt
-ARCH=amd64
+# ARCH=amd64
+ARCH=arm64
 build-container :
+	@echo ARCH $(ARCH)
+	@docker build -t $(USER)/$(DOCKER_IMAGE_NAME):$(ARCH) .
+
+test-container :
+	@docker rm -f $(DOCKER_IMAGE_NAME) || true
+	@docker run \
+           -v $(HOME)/credfiles/config_docker.toml:/etc/config/config.toml  \
+           -v $(HOME)/credfiles/credentials.yaml:/etc/config/credentials.yaml \
+           -p 3000:3000 --name=$(DOCKER_IMAGE_NAME) $(USER)/$(DOCKER_IMAGE_NAME):$(ARCH) \
+           komiser start --config /etc/config/config.toml
+
+test-container-d :
+	@docker rm -f $(DOCKER_IMAGE_NAME) || true
+	@docker run \
+           -v $(HOME)/credfiles/config_docker.toml:/etc/config/config.toml  \
+           -v $(HOME)/credfiles/credentials.yaml:/etc/config/credentials.yaml \
+           -d -p 3000:3000 --name=$(DOCKER_IMAGE_NAME) $(USER)/$(DOCKER_IMAGE_NAME):$(ARCH) \
+           komiser start --config /etc/config/config.toml
+
+build-container-p :
 	@echo ARCH $(ARCH)
 	@docker build --platform linux/$(ARCH) -t $(USER)/$(DOCKER_IMAGE_NAME):$(ARCH) .
 
 push-container :
 	@docker push $(USER)/$(DOCKER_IMAGE_NAME):$(ARCH)
 
-test-container :
+test-container-p :
+	@docker rm -f $(DOCKER_IMAGE_NAME) || true
+	@docker run --platform linux/$(ARCH) \
+           -v $(HOME)/credfiles/config_docker.toml:/etc/config/config.toml  \
+           -v $(HOME)/credfiles/credentials.yaml:/etc/config/credentials.yaml \
+           -p 3000:3000 --name=$(DOCKER_IMAGE_NAME) $(USER)/$(DOCKER_IMAGE_NAME):$(ARCH) \
+           komiser start --config /etc/config/config.toml
+
+test-container-d-p :
 	@docker rm -f $(DOCKER_IMAGE_NAME) || true
 	@docker run --platform linux/$(ARCH) \
            -v $(HOME)/credfiles/config_docker.toml:/etc/config/config.toml  \
